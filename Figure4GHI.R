@@ -3,23 +3,6 @@ library(plyr)
 library(dplyr)
 
 #import data
-tbl_human<- c()
-for (x in list.files(pattern="*human_out_gene_exon_tagged.dge.txt")) {
-  u<-read.table(x, header=T,stringsAsFactors = F)
-  u$Label = factor(x)
-  tbl_human <- rbind(tbl_human, u)
-  cat(x, "\n ")
-}
-
-tbl_mouse<- c()
-for (x in list.files(pattern="*mouse_out_gene_exon_tagged.dge.txt")) {
-  u<-read.table(x, header=T,stringsAsFactors = F)
-  u$Label = factor(x)
-  tbl_mouse <- rbind(tbl_mouse, u)
-  cat(x, "\n ")
-}
-
-#just looking at the final experiment:
 SZmix_stats_human <- read.table("SZ-RG_S7_L001_human_out_gene_exon_tagged.dge.summary.txt",header=T,stringsAsFactors = F)
 SZmix_stats_mouse <- read.table("SZ-RG_S7_L001_mouse_out_gene_exon_tagged.dge.summary.txt",header=T,stringsAsFactors = F)
 
@@ -168,14 +151,13 @@ library(dplyr)
 library(data.table)
 slim <-t(data.frame(strsplit(as.character(stats$Label),"_",fixed = T)))
 SZ_stats <- cbind(stats[ ,1:4],slim[ ,c(1,4)])
-#SZ_stats <- SZ_stats[-c(15,16), ]
+
 library(mgsub)
 SZ_stats_names <- cbind(SZ_stats,mgsub(SZ_stats$CELL_BARCODE,c("GCTNGTCGTTTG","GCANGAACCACA","AGANATGAGGGT","ACGNACCTGTTC"),
                                        c("R3cell","R1cell","G5cell","G3cell")))
 SZ_stats_names$Label <- paste(SZ_stats_names$'1',SZ_stats_names$'2')
 SZ_stats_names <- SZ_stats_names[c(9,10,15,16) ,c(2:4,7,8)]
 colnames(SZ_stats_names)<- c("Gene_reads","Trans_num","Gene_number","Cell_number","Exp")
-#RG_stats_names$Cell_number <- type.convert(RG_stats_names$Cell_number,na.strings = "NA", as.is = FALSE, dec = ".")
 write.table(SZ_stats_names,"SZstats.txt")
 
 library(ggplot2)
@@ -209,14 +191,12 @@ library(umap)
 #separate data columns from labels
 SZmix_data_submix_mat <- SZmix_data_submix[ ,2:5]
 SZmix_data_submix_row.names <- SZmix_data_submix$gene_id
-#SZmix_umap <- umap(SZmix_data_submix_mat,n_epochs=500)
-#write.table(SZmix_umap$layout,"SZmix_umap.txt",sep="\t",row.names = F)
+
 
 SZmix_data_submix_mat <- SZmix_data_submix[ ,2:5]
 SZmix_data_submix_row.names <- SZmix_data_submix$gene_id
 SZmix_data_submix_mat_t <- t(SZmix_data_submix_mat)
 SZmix_umap <- umap(SZmix_data_submix_mat_t,n_epochs=500,n_neighbors=4)
-
 
 #futz with data to prepare for plotting
 SZmix_umap_lay <- as.data.frame(SZmix_umap$layout) 
@@ -253,7 +233,6 @@ ggplot(SZmix_umap_lay, aes(Dim1,Dim2,colour=sample)) +
 dev.off()
 
 library(Rtsne)
-#Betty_wt_matrix <- as.matrix(Betty_unique)
 SZ_normal <- normalize_input(SZmix_data_submix_mat_t)
 colMeans(SZ_normal)
 range(SZ_normal)
